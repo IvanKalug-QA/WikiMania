@@ -5,7 +5,7 @@ from djoser.serializers import UserCreateSerializer
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 
-from wiki.models import Wiki
+from wiki.models import Wiki, Subscribe
 
 User = get_user_model()
 
@@ -22,6 +22,17 @@ class GetUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'email', 'username', 'first_name', 'last_name')
         read_only_fields = fields
+
+    def validate(self, data):
+        author = self.instance
+        user = self.context['request'].user
+        if Subscribe.objects.filter(
+             user=user,
+             subscribe=author.id).exists():
+            raise serializers.ValidationError('Ты уже подписан!')
+        if author == user:
+            raise serializers.ValidationError('На себя подписываться нельзя!')
+        return data
 
 
 class Base64ImageSerializer(serializers.ImageField):
