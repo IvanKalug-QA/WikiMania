@@ -65,3 +65,13 @@ class WikiViewSet(ModelViewSet):
         if self.request.user != instance.author:
             raise PermissionDenied('Удалить может только автор!')
         return super().perform_destroy(instance)
+
+
+class MyWikiViewSet(ModelViewSet):
+    serializer_class = WikiSerializer
+    http_method_names = ['get', ]
+
+    def get_queryset(self):
+        subscribed_users = Subscribe.objects.filter(
+            user=self.request.user).values_list('subscribe', flat=True)
+        return Wiki.objects.filter(author__in=subscribed_users)

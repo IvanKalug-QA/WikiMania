@@ -45,7 +45,7 @@ class Wiki(models.Model):
         verbose_name='Фотография'
     )
     text = models.TextField(
-        verbose_name='Описаник'
+        verbose_name='Описаниe'
     )
     author = models.ForeignKey(
         CustomUser, verbose_name='Автор',
