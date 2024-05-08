@@ -18,9 +18,15 @@ class CreateUserSerializers(UserCreateSerializer):
 
 
 class GetUserSerializer(serializers.ModelSerializer):
+    count_wiki = serializers.SerializerMethodField()
+
+    def get_count_wiki(self, obj):
+        return obj.wiki_all.count()
+
     class Meta:
         model = User
-        fields = ('id', 'email', 'username', 'first_name', 'last_name')
+        fields = (
+            'id', 'email', 'username', 'first_name', 'last_name', 'count_wiki')
         read_only_fields = fields
 
     def validate(self, data):

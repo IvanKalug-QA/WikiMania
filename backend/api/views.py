@@ -15,6 +15,12 @@ class UserViewSet(UserViewSet):
     http_method_names = ['get', 'post', 'delete',]
     lookup_field = 'pk'
 
+    def get_queryset(self):
+        return CustomUser.objects.all()
+
+    def get_object(self):
+        return get_object_or_404(self.get_queryset(), pk=self.kwargs['pk'])
+
     @action(methods=['DELETE', 'POST'], detail=True)
     def subscribe(self, request, pk):
         user = get_object_or_404(CustomUser, pk=pk)

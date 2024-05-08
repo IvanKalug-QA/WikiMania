@@ -5,7 +5,7 @@ from .views import UserViewSet, WikiViewSet, MyWikiViewSet
 
 router = DefaultRouter()
 
-router.register('users', UserViewSet)
+router.register('users', UserViewSet, basename='users')
 router.register('wiki', WikiViewSet)
 router.register('mywiki', MyWikiViewSet, basename='mywiki')
 
