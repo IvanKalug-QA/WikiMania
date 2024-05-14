@@ -5,7 +5,7 @@ from djoser.serializers import UserCreateSerializer
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 
-from wiki.models import Wiki, Subscribe
+from wiki.models import Wiki, Subscribe, Like, Dislike
 
 User = get_user_model()
 
@@ -55,10 +55,43 @@ class WikiSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         slug_field='username', read_only=True
     )
+    likes = serializers.SerializerMethodField()
+    dislikes = serializers.SerializerMethodField()
+
+    def get_likes(self, obj):
+        return obj.wiki_likes.count()
+
+    def get_dislikes(self, obj):
+        return obj.wiki_dislikes.count()
 
     class Meta:
         model = Wiki
         fields = (
-            'id', 'title', 'image', 'text', 'author'
+            'id', 'title', 'image', 'text', 'author', 'likes', 'dislikes'
         )
-        read_only_fields = ('author',)
+        read_only_fields = ('author', 'likes', 'dislikes')
+
+
+class GetWikiSerializer(WikiSerializer):
+    image = Base64ImageSerializer(read_only=True)
+
+    def validate(self, data):
+        request = self.context['request']
+        if 'like' in request.path:
+            if Like.objects.filter(user=request.user,
+                                   wiki_like=self.instance).exists():
+                raise serializers.ValidationError(
+                    'Ты уже подписан!'
+                )
+            return data
+        elif 'dislike' in request.path:
+            if Dislike.objects.filter(user_diser=request.user,
+                                      wiki_dislike=self.instance).exists():
+                raise serializers.ValidationError(
+                    'Ты уже дисанул!'
+                )
+            return data
+        return data
+
+    class Meta(WikiSerializer.Meta):
+        read_only_fields = WikiSerializer.Meta.fields

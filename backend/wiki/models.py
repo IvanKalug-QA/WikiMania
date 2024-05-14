@@ -65,3 +65,33 @@ class Subscribe(models.Model):
         verbose_name='Посписчик',
         on_delete=models.CASCADE
     )
+
+
+class Like(models.Model):
+    user = models.ForeignKey(
+        CustomUser,
+        verbose_name='Поставил лайк',
+        on_delete=models.CASCADE,
+        related_name='user_likes'
+    )
+    wiki_like = models.ForeignKey(
+        Wiki,
+        verbose_name='Лайкнутая статья',
+        on_delete=models.CASCADE,
+        related_name='wiki_likes'
+    )
+
+
+class Dislike(models.Model):
+    user_diser = models.ForeignKey(
+        CustomUser,
+        verbose_name='Поставил дислайк',
+        on_delete=models.CASCADE,
+        related_name='user_dislikes'
+    )
+    wiki_dislike = models.ForeignKey(
+        Wiki,
+        verbose_name='Дислайкнутая статья',
+        on_delete=models.CASCADE,
+        related_name='wiki_dislikes'
+    )

@@ -7,8 +7,8 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 
-from wiki.models import Wiki, Subscribe, CustomUser
-from .serializers import WikiSerializer, GetUserSerializer
+from wiki.models import Wiki, Subscribe, CustomUser, Like, Dislike
+from .serializers import WikiSerializer, GetUserSerializer, GetWikiSerializer
 
 
 class UserViewSet(UserViewSet):
@@ -58,6 +58,53 @@ class WikiViewSet(ModelViewSet):
         'get', 'post', 'delete', 'patch'
     )
     lookup_field = 'pk'
+
+    @action(methods=['POST', 'DELETE'], detail=True)
+    def like(self, request, pk):
+        wiki = self.get_object()
+        if request.method == 'POST':
+            serializer = GetWikiSerializer(
+                wiki, data=request.data, context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            Like.objects.create(user=request.user, wiki_like=wiki)
+            return Response(
+                data=serializer.data, status=status.HTTP_201_CREATED)
+        elif request.method == 'DELETE':
+            try:
+                Like.objects.get(user=request.user, wiki_like=wiki).delete()
+                return Response(
+                    data={'message': 'Лайк убран'},
+                    status=status.HTTP_204_NO_CONTENT
+                )
+            except ObjectDoesNotExist:
+                return Response(
+                    data={'message': 'Ты не поставил лайк'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+    @action(methods=['POST', 'DELETE'], detail=True)
+    def dislike(self, request, pk):
+        wiki = self.get_object()
+        if request.method == 'POST':
+            serializer = GetWikiSerializer(
+                wiki, data=request.data, context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            Dislike.objects.create(user_diser=request.user, wiki_dislike=wiki)
+            return Response(
+                data=serializer.data, status=status.HTTP_201_CREATED)
+        elif request.method == 'DELETE':
+            try:
+                Dislike.objects.get(
+                    user_diser=request.user, wiki_dislike=wiki).delete()
+                return Response(
+                    data={'message': 'Дислайк убран'},
+                    status=status.HTTP_204_NO_CONTENT
+                )
+            except ObjectDoesNotExist:
+                return Response(
+                    data={'message': 'Ты не поставил дислайк'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
