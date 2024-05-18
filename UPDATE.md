@@ -4,6 +4,8 @@
     - Страница всех пользователей
     - Страница пользователя
     - Можно публиковать новости, статьи
+    - Можно редактировать, удалять новости или статьи
+    - Страница поста или статьи
     - Просматривать чужие новости
 
 # --------- <a href="https://online-letters.ru/" target="_blank"><img src="https://x-lines.ru/letters/i/cyrillictechno/0020/fc1d1f/20/0/kiereokwewodymtofa3y.png" border="0" /></a> ---------
