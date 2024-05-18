@@ -1,5 +1,8 @@
 # --------- <a href="https://online-letters.ru/" target="_blank"><img src="https://x-lines.ru/letters/i/cyrillictechno/0020/ff0a1b/20/0/kiereokwewodymtofaao.png" border="0" /></a> ---------
     - Регистрация пользователей
+    - Главная страница
+    - Страница всех пользователей
+    - Страница пользователя
     - Можно публиковать новости, статьи
     - Просматривать чужие новости
 
