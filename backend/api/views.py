@@ -7,8 +7,12 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 
-from wiki.models import Wiki, Subscribe, CustomUser, Like, Dislike
-from .serializers import WikiSerializer, GetUserSerializer, GetWikiSerializer
+from wiki.models import (
+    Wiki, Subscribe, CustomUser, Like,
+    Dislike, PortalLike, PortalDislake, PortalFoto)
+from .serializers import (
+    WikiSerializer, GetUserSerializer,
+    GetWikiSerializer, PortalFotoSerializer, GetPortalSerializer)
 
 
 class UserViewSet(UserViewSet):
@@ -128,3 +132,55 @@ class MyWikiViewSet(ModelViewSet):
         subscribed_users = Subscribe.objects.filter(
             user=self.request.user).values_list('subscribe', flat=True)
         return Wiki.objects.filter(author__in=subscribed_users)
+
+
+class PortalViewSet(ModelViewSet):
+    queryset = PortalFoto.objects.all()
+    serializer_class = PortalFotoSerializer
+    http_method_names = ['get', 'post', 'delete']
+    lookup_field = 'pk'
+
+    @action(methods=['POST', 'DELETE'], detail=True)
+    def like(self, request, pk):
+        image = self.get_object()
+        if request.method == 'POST':
+            serializer = GetPortalSerializer(
+                image, data=request.data, context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            PortalLike.objects.create(
+                author=request.user, like_image=image)
+            return Response(data={
+                'message': 'Лайк подставлен!'}, status=status.HTTP_200_OK)
+        elif request.method == 'DELETE':
+            get_object_or_404(PortalLike,
+                              author=request.user, like_image=image).delete()
+            return Response(
+                data={'message': 'Ты убрал лайк!'},
+                status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['POST', 'DELETE'], detail=True)
+    def dislike(self, request, pk):
+        image = self.get_object()
+        if request.method == 'POST':
+            serializer = GetPortalSerializer(
+                image, data=request.data, context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            PortalDislake.objects.create(
+                author_to_image=request.user, dislake_image=image)
+            return Response(data={
+                'message': 'Дислайк подставлен!'}, status=status.HTTP_200_OK)
+        elif request.method == 'DELETE':
+            get_object_or_404(PortalDislake,
+                              author_to_image=request.user,
+                              dislake_image=image).delete()
+            return Response(
+                data={'message': 'Ты убрал дислайк!'},
+                status=status.HTTP_204_NO_CONTENT)
+
+    def perform_create(self, serializer):
+        serializer.save(author_image=self.request.user)
+
+    def perform_destroy(self, instance):
+        if self.request.user != instance.author_image:
+            raise PermissionDenied('Это не твоя фотография!')
+        return self.perform_destroy(instance)

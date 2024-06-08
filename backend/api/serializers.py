@@ -5,7 +5,8 @@ from djoser.serializers import UserCreateSerializer
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 
-from wiki.models import Wiki, Subscribe, Like, Dislike
+from wiki.models import (
+    Wiki, Subscribe, Like, Dislike, PortalFoto, PortalDislake, PortalLike)
 
 User = get_user_model()
 
@@ -77,14 +78,14 @@ class GetWikiSerializer(WikiSerializer):
 
     def validate(self, data):
         request = self.context['request']
-        if 'like' in request.path:
+        if '/like/' in request.path:
             if Like.objects.filter(user=request.user,
                                    wiki_like=self.instance).exists():
                 raise serializers.ValidationError(
-                    'Ты уже подписан!'
+                    'Ты уже поставил лайк!'
                 )
             return data
-        elif 'dislike' in request.path:
+        elif '/dislike/' in request.path:
             if Dislike.objects.filter(user_diser=request.user,
                                       wiki_dislike=self.instance).exists():
                 raise serializers.ValidationError(
@@ -95,3 +96,46 @@ class GetWikiSerializer(WikiSerializer):
 
     class Meta(WikiSerializer.Meta):
         read_only_fields = WikiSerializer.Meta.fields
+
+
+class PortalFotoSerializer(serializers.ModelSerializer):
+    user_image = Base64ImageSerializer()
+    author_image = serializers.SlugRelatedField(
+        slug_field='username', read_only=True
+    )
+    likes = serializers.SerializerMethodField()
+    dislikes = serializers.SerializerMethodField()
+
+    def get_likes(self, obj):
+        return obj.image_likes.count()
+
+    def get_dislikes(self, obj):
+        return obj.dislake_images.count()
+
+    class Meta:
+        model = PortalFoto
+        fields = ('author_image', 'user_image', 'likes', 'dislikes',)
+        read_only_fields = ('likes', 'dislikes',)
+
+
+class GetPortalSerializer(PortalFotoSerializer):
+    user_image = Base64ImageSerializer(read_only=True)
+
+    def validate(self, data):
+        image = self.instance
+        request = self.context['request']
+        if '/like/' in request.path:
+            if PortalLike.objects.filter(
+                 author=request.user, like_image=image.id).exists():
+                raise serializers.ValidationError('Ты уже поставил лайк!')
+            return data
+        elif '/dislike/' in request.path:
+            if PortalDislake.objects.filter(
+                 author_to_image=request.user,
+                 dislake_image=image.id).exists():
+                raise serializers.ValidationError('Ты уже поставил дислайк!')
+            return data
+        return data
+
+    class Meta(PortalFotoSerializer.Meta):
+        read_only_fields = PortalFotoSerializer.Meta.fields

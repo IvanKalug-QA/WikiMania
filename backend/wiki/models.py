@@ -95,3 +95,44 @@ class Dislike(models.Model):
         on_delete=models.CASCADE,
         related_name='wiki_dislikes'
     )
+
+
+class PortalFoto(models.Model):
+    author_image = models.ForeignKey(
+        CustomUser, verbose_name='Автор фото',
+        on_delete=models.CASCADE
+    )
+    user_image = models.ImageField(
+        verbose_name='Фото пользователя',
+        upload_to='portal'
+    )
+
+
+class PortalLike(models.Model):
+    author = models.ForeignKey(
+        CustomUser,
+        verbose_name='Автор',
+        related_name='author_prof',
+        on_delete=models.CASCADE
+    )
+    like_image = models.ForeignKey(
+        PortalFoto,
+        verbose_name='Поставили лайк',
+        related_name='image_likes',
+        on_delete=models.CASCADE
+    )
+
+
+class PortalDislake(models.Model):
+    author_to_image = models.ForeignKey(
+        CustomUser,
+        verbose_name='Автор фото',
+        related_name='author_to_prof',
+        on_delete=models.CASCADE
+    )
+    dislake_image = models.ForeignKey(
+        PortalFoto,
+        verbose_name='Дислайков под фото',
+        related_name='dislake_images',
+        on_delete=models.CASCADE
+    )
