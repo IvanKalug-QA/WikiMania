@@ -22,5 +22,5 @@
 
 # --------- <a href="https://online-letters.ru/" target="_blank"><img src="https://x-lines.ru/letters/i/cyrillictechno/0020/ff0000/20/0/kiereokwewodymtofa4o.png" border="0" /></a> ---------
     - Добавлена возможность публиковать и удалять свои фото
-    - Можно ставить дислайки под фото
+    - Можно ставить лайки и дислайки под фото
     - У фото отображается имя автора опубликовавшего ее
